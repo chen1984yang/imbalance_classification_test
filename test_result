@@ -1,0 +1,20 @@
+(768, 9)
+pima 0BalanceCascade [   0.013267  268.        268.          0.904727    0.856419    0.902862]
+pima 1EasyEnsemble [   0.006166  268.        268.          0.900488    0.849049    0.897805]
+pima 2SMOTE+AdaBoost [   0.00399   500.        500.          0.971526    0.960891    0.97141 ]
+pima 3SMOTE+RandomForest [   0.004167  500.        500.          0.803633    0.740062    0.803434]
+pima 4RandomOverSampler+AdaBoost [   0.0015    500.        500.          0.98015     0.970704    0.98012 ]
+pima 5RandomOverSampler+RandomForest [   0.001686  500.        500.          0.812817    0.749679    0.812063]
+pima 6RandomUnderSampler+AdaBoost [   0.001331  268.        268.          0.903916    0.85512     0.901947]
+pima 7RandomUnderSampler+RandomForest [   0.001361  268.        268.          0.805217    0.741804    0.805047]
+
+
+(306, 4)
+haberman 0BalanceCascade [  0.015752  81.         0.         0.83055    0.840762   0.826196]
+haberman 1EasyEnsemble [  0.006712  81.         0.         0.82786    0.832052   0.821924]
+haberman 2SMOTE+AdaBoost [   0.002594  225.          0.          0.925553    0.953423    0.924898]
+haberman 3SMOTE+RandomForest [   0.002619  225.          0.          0.734325    0.807088    0.733293]
+haberman 4RandomOverSampler+AdaBoost [   0.001201  225.          0.          0.952522    0.961067    0.952276]
+haberman 5RandomOverSampler+RandomForest [   0.001332  225.          0.          0.734454    0.81226     0.733342]
+haberman 6RandomUnderSampler+AdaBoost [  0.001232  81.         0.         0.818801   0.827153   0.81365 ]
+haberman 7RandomUnderSampler+RandomForest [  0.001234  81.         0.         0.740266   0.794254   0.738556]
