@@ -18,3 +18,16 @@ haberman 4RandomOverSampler+AdaBoost [   0.001201  225.          0.          0.9
 haberman 5RandomOverSampler+RandomForest [   0.001332  225.          0.          0.734454    0.81226     0.733342]
 haberman 6RandomUnderSampler+AdaBoost [  0.001232  81.         0.         0.818801   0.827153   0.81365 ]
 haberman 7RandomUnderSampler+RandomForest [  0.001234  81.         0.         0.740266   0.794254   0.738556]
+
+
+Features:  15
+letter 0BalanceCascade [   0.171018    1.579681  789.        789.          0.979907    0.68738
+    0.979743]
+letter 1EasyEnsemble [   0.038277    1.37619   789.        789.          0.978172    0.66974
+    0.977971]
+letter 2SMOTE+AdaBoost [     0.119802     20.7211    19211.        19211.            0.997103
+      0.993151      0.997065]
+letter 4RandomOverSampler+AdaBoost [     0.016898     11.91583   19211.        19211.            0.999906
+      0.997719      0.999906]
+letter 6RandomUnderSampler+AdaBoost [   0.012976    3.54559   789.        789.          0.978652    0.67592
+    0.978472]

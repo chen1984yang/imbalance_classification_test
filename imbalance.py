@@ -79,8 +79,8 @@ def sampling_n_train(full_X, full_y, sampling_method, estimator, pos_label, c_it
     conf_mat = []
     for j in range(repeat):
         conf_mat.append(cv_train(X, y, full_X, full_y, estimator, pos_label, c_iteration, max_features, random_state=j))
-
-    result1 = [time_used, pos_count, neg_count]
+    totalTime = time.time() - start
+    result1 = [time_used, totalTime,pos_count, neg_count]
     result2 = np.mean(conf_mat, axis=0)
     result = []
     result.extend(result1)
@@ -103,8 +103,8 @@ def sampling_n_train_ensemble(full_X, full_y, sampling_method, estimator, pos_la
         negs.append(neg_count)
         poss.append(pos_count)
         conf_mat.append(cv_train(X, y, full_X, full_y, estimator, pos_label, c_iteration, max_features = -1,random_state=random_state))
-
-    result1 = [used, np.mean(poss), np.mean(negs)]
+    totalTime = time.time() - start
+    result1 = [used, totalTime,np.mean(poss), np.mean(negs)]
     result2 = np.mean(conf_mat, axis=0)
     result = []
     result.extend(result1)
@@ -123,16 +123,24 @@ def generate_data(data_index):
        full_X = data[:, 0:8]
        full_y = data[:, 8]
        pos_label = 1
+       full_y = full_y.astype(int)
 
     elif data_index ==1:
         data = np.loadtxt('data/haberman.data', delimiter=delimiter)
         full_X = data[:, 0:3]
         full_y = data[:, 3]
         pos_label = 2
-
-    print(data.shape)
+        full_y = full_y.astype(int)
+    elif data_index == 2:
+        full_X = np.loadtxt('data/letter-recognition.data', delimiter=',', usecols=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15])
+        labels = np.loadtxt('data/letter-recognition.data', delimiter=',', usecols=[0],dtype=np.str)
+        full_y = []
+        for x in labels:
+            v = 1 if x == 'A' else 0
+            full_y.append(v)
+        pos_label = 1
     max_features = full_X.shape[1]
-    full_y = full_y.astype(int)
+    print('Features: ', max_features)
     return full_X,full_y,pos_label,max_features
 
 def comparison_test(repeat, method, full_X, full_y, pos_label,max_features):
@@ -182,13 +190,13 @@ def comparison_test(repeat, method, full_X, full_y, pos_label,max_features):
 
 if __name__ == '__main__':
     np.set_printoptions(precision=6, suppress=True)
-    data = ['pima','haberman']
+    data = ['pima','haberman','letter']
 
     method = ['0BalanceCascade', '1EasyEnsemble','2SMOTE+AdaBoost','3SMOTE+RandomForest','4RandomOverSampler+AdaBoost',
               '5RandomOverSampler+RandomForest','6RandomUnderSampler+AdaBoost','7RandomUnderSampler+RandomForest']
-    testMethod = [0,1,2,3,4,5,6,7]
-    #testMethod = [3]
-    d_i = 1
+    testMethod = [0,1,2,4,6]
+    #testMethod = [0]
+    d_i = 2
     full_X, full_y, pos_label,max_features = generate_data(d_i)
 
 
