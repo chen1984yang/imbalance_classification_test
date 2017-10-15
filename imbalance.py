@@ -3,8 +3,6 @@ from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.model_selection import StratifiedKFold
 from sklearn.tree import DecisionTreeClassifier
-from imblearn.under_sampling import *
-from imblearn.over_sampling import *
 from imblearn.combine import *
 from imblearn.ensemble import EasyEnsemble, BalanceCascade
 from imblearn.over_sampling import SMOTE
@@ -132,13 +130,28 @@ def generate_data(data_index):
         pos_label = 2
         full_y = full_y.astype(int)
     elif data_index == 2:
-        full_X = np.loadtxt('data/letter-recognition.data', delimiter=',', usecols=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15])
-        labels = np.loadtxt('data/letter-recognition.data', delimiter=',', usecols=[0],dtype=np.str)
+        full_X = np.loadtxt('data/letter-recognition.data', delimiter=delimiter, usecols=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15])
+        labels = np.loadtxt('data/letter-recognition.data', delimiter=delimiter, usecols=[0],dtype=np.str)
         full_y = []
         for x in labels:
             v = 1 if x == 'A' else 0
             full_y.append(v)
         pos_label = 1
+    elif data_index==3:
+        data = np.loadtxt('data/creditcard.csv', delimiter=delimiter,skiprows=1,dtype=np.str)
+        #sample = []
+        #for j in range(100):
+        #    sample.append(data[j])
+
+        data = np.array(data)
+        full_X = data[:, 0:30].astype(float)
+        labels = data[:, 30]
+        full_y = []
+        for x in labels:
+            v = 0 if x == '"0"' else 1
+            full_y.append(v)
+        pos_label = 1
+
     max_features = full_X.shape[1]
     print('Features: ', max_features)
     return full_X,full_y,pos_label,max_features
@@ -190,13 +203,13 @@ def comparison_test(repeat, method, full_X, full_y, pos_label,max_features):
 
 if __name__ == '__main__':
     np.set_printoptions(precision=6, suppress=True)
-    data = ['pima','haberman','letter']
+    data = ['pima','haberman','letter','credit card']
 
     method = ['0BalanceCascade', '1EasyEnsemble','2SMOTE+AdaBoost','3SMOTE+RandomForest','4RandomOverSampler+AdaBoost',
               '5RandomOverSampler+RandomForest','6RandomUnderSampler+AdaBoost','7RandomUnderSampler+RandomForest']
-    testMethod = [0,1,2,4,6]
+    testMethod = [0]
     #testMethod = [0]
-    d_i = 2
+    d_i = 3
     full_X, full_y, pos_label,max_features = generate_data(d_i)
 
 
