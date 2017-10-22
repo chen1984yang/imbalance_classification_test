@@ -21,7 +21,7 @@ class KSigmaOutlierDetector(object):
 
     def fit_predict(self, X, y):
         counter = Counter(y)
-        minority_class = max(counter, key=counter.get)
+        minority_class = min(counter, key=counter.get)
 
         outlying_count = np.zeros(shape=(X.shape[0]))
         for i in range(X.shape[1]):
@@ -50,7 +50,7 @@ class SimpleOutlierDetector(object):
 
     def fit_predict(self, X, y):
         counter = Counter(y)
-        _, minority_class = max(counter, key=counter.get)
+        _, minority_class = min(counter, key=counter.get)
 
         if type(X) == pd.DataFrame:
             X = X.values
