@@ -12,12 +12,15 @@ from sklearn.datasets import make_classification
 import numpy as np
 import time
 import math
+import lightgbm as lgb
+import dataset
+from collections import Counter
 
 from logger import *
 
-
 def adaboost_train(X, y, train_index, valid_index, test_X, test_y, pos_label, c_iteration, max_features=-1):
     clf = AdaBoostClassifier(DecisionTreeClassifier(), n_estimators=c_iteration)
+    start = time.time()
     clf.fit(X[train_index], y[train_index])
 
     pred_y = clf.predict(test_X)
@@ -33,14 +36,14 @@ def adaboost_train(X, y, train_index, valid_index, test_X, test_y, pos_label, c_
     tpr = tp / (tp + fn)
     tnr = tn / (tn + fp)
     gmean = math.sqrt(tpr * tnr)
-
+    print([time.time() - start, auc, fscore, gmean])
     return [auc, fscore, gmean]
 
 
 def randomforest_train(X, y, train_index, valid_index, test_X, test_y, pos_label, c_iteration, max_features):
-    clf = RandomForestClassifier(n_estimators=c_iteration, max_depth=4, max_features=max_features, max_leaf_nodes=10)
+    clf = RandomForestClassifier(n_estimators=c_iteration, max_features=max_features, n_jobs=4)
+    start = time.time()
     clf.fit(X[train_index], y[train_index])
-
     pred_y = clf.predict(test_X)
     # calculate auc
     fpr, tpr, thresholds = metrics.roc_curve(test_y, pred_y, pos_label=pos_label)
@@ -54,7 +57,7 @@ def randomforest_train(X, y, train_index, valid_index, test_X, test_y, pos_label
     tpr = tp / (tp + fn)
     tnr = tn / (tn + fp)
     gmean = math.sqrt(tpr * tnr)
-    print([auc, fscore, gmean])
+    print([time.time() - start, auc, fscore, gmean])
     return [auc, fscore, gmean]
 
 
@@ -64,7 +67,7 @@ def cv_train(X, y, test_X, test_y, method, pos_label, c_iteration, max_features,
     for train_index, valid_index in cv.split(X, y):
         start = time.time()
         cf = method(X, y, train_index, valid_index, test_X, test_y, pos_label, c_iteration, max_features)
-        file_log("imbalance.log", "training time", time.time() - start)
+        # file_log("imbalance.log", "training time", time.time() - start)
         conf_mat.append(cf)
     return np.mean(conf_mat, axis=0)
 
@@ -72,24 +75,32 @@ from sklearn.model_selection import train_test_split
 
 def sampling_n_train(full_X, full_y, sampling_method, estimator, pos_label, c_iteration, max_features, repeat=4):
     start = time.time()
-    train_X, test_X, train_y, test_y = train_test_split(full_X, full_y, test_size=1/repeat, stratify=full_y)
-    neg_count = len(train_y[train_y == 0])
-    pos_count = len(train_y) - neg_count
-    # file_log("imbalance.log", "sampling started", sampling_method.__class__.__name__, pos_count, neg_count)
-
-    X, y = sampling_method.fit_sample(train_X, train_y)
-    neg_count = len(y[y == 0])
-    pos_count = len(y) - neg_count
     time_used = time.time() - start
+    print(sampling_method.__class__.__name__, "sampling time", time_used)
     # file_log("imbalance.log", "sampling ended", sampling_method.__class__.__name__, pos_count, neg_count, time_used)
 
     conf_mat = []
+    poss = []
+    negs = []
     for j in range(repeat):
+        train_X, test_X, train_y, test_y = train_test_split(full_X, full_y, test_size=1 / repeat, stratify=full_y)
+        # neg_count = len(train_y[train_y == 0])
+        # pos_count = len(train_y) - neg_count
+        # file_log("imbalance.log", "sampling started", sampling_method.__class__.__name__, pos_count, neg_count)
+
+        X, y = sampling_method.fit_sample(train_X, train_y)
+        sampled_neg_count = len(y[y == 0])
+        sampled_pos_count = len(y) - sampled_neg_count
+        poss.append(sampled_pos_count)
+        negs.append(sampled_neg_count)
+
         conf_mat.append(cv_train(X, y, test_X, test_y, estimator, pos_label, c_iteration, max_features, random_state=j))
     totalTime = time.time() - start
     n_trials = len(conf_mat)
-    result1 = [time_used / n_trials, totalTime / n_trials]
-    result2 = np.mean(conf_mat, axis=0) * repeat
+    avg_sampled_pos_count = np.mean(poss)
+    avg_sampled_neg_count = np.mean(negs)
+    result1 = [time_used / n_trials, totalTime / n_trials, avg_sampled_pos_count, avg_sampled_neg_count]
+    result2 = np.mean(conf_mat, axis=0)
     result = []
     result.extend(result1)
     result.extend(result2)
@@ -100,7 +111,7 @@ def sampling_n_train_ensemble(full_X, full_y, sampling_method, estimator, pos_la
     start = time.time()
 
     used = time.time() - start
-    conf_mat = []
+    results = []
     negs = []
     poss = []
     for i in range(repeat):
@@ -111,12 +122,12 @@ def sampling_n_train_ensemble(full_X, full_y, sampling_method, estimator, pos_la
             pos_count = len(y[y == 1])
             negs.append(neg_count)
             poss.append(pos_count)
-            conf_mat.append(cv_train(X, y, test_X, test_y, estimator, pos_label, c_iteration, max_features=-1, random_state=random_state))
+            results.append(cv_train(X, y, test_X, test_y, estimator, pos_label, c_iteration, max_features=-1, random_state=random_state))
     totalTime = time.time() - start
-    n_trials = len(conf_mat)
-    print("total prediction", np.array(conf_mat).sum(), len(full_y))
+    n_trials = len(results)
+    print("trial result", np.array(results).mean(axis=0), len(full_y))
     result1 = [used / n_trials, totalTime / n_trials]
-    result2 = np.mean(conf_mat, axis=0) * repeat
+    result2 = np.mean(results, axis=0) * repeat
     result = []
     result.extend(result1)
     result.extend(result2)
@@ -156,7 +167,7 @@ def generate_data(data_index):
             full_y.append(v)
         pos_label = 1
     elif data_index == 3:
-        data = np.loadtxt(join(location, 'data/creditcard.csv'), delimiter=delimiter, skiprows=1, dtype=bytes)
+        data = np.loadtxt(join(location, 'data', 'FraudDetection', 'creditcard.csv'), delimiter=delimiter, skiprows=1, dtype=bytes)
         # sample = []
         # for j in range(100):
         #    sample.append(data[j])
@@ -169,6 +180,10 @@ def generate_data(data_index):
             v = 0 if x == b'"0"' else 1
             full_y.append(v)
         pos_label = 1
+
+    elif data_index == 4:
+        full_X, full_y = dataset.load_santander()
+        pos_label = 0
 
     max_features = full_X.shape[1]
     file_log("imbalance.log", 'Features: ', max_features)

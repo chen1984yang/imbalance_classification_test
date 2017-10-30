@@ -86,6 +86,10 @@ def load_santander():
     print(len(pos), len(neg))
     return X, y
 
+def load_santander_test():
+    test_X = pd.read_csv(join(location, DATASET_ROOT, "Santander", "test.csv"), sep=",")
+    return test_X.values
+
 def load_safedriver():
     full_train = pd.read_csv(join(location, DATASET_ROOT, "SafeDriver", "train.csv"), sep=",")
     # print(full_train.columns)
@@ -97,7 +101,10 @@ def load_safedriver():
     print(len(pos), len(neg))
     return X, y
 
-def load_fraud_detection():
+def load_fraud_detection(direct=True, sampled=False):
+    if sampled:
+        data = np.loadtxt(join(location, DATASET_ROOT, 'FraudDetection', 'creditcard-sampled.csv'), delimiter=',')
+        return data[:, :-1], data[:, -1]
     start = time.time()
     data = np.loadtxt(join(location, DATASET_ROOT, 'FraudDetection', 'creditcard.csv'), delimiter=',', skiprows=1, dtype=bytes)
 
@@ -111,10 +118,15 @@ def load_fraud_detection():
 
 
 if __name__ == '__main__':
-    # X, y = load_fraud_detection()
-    # print(X.shape)
+    X, y = load_fraud_detection(sampled=True)
+    # import sampling
+    # X_1, y_1 = sampling.reduce_majority(X, y)
+    # pos = y_1[y_1 == 1]
+    # neg = y_1[y_1 == 0]
+    # np.savetxt(join(location, DATASET_ROOT, 'FraudDetection', 'creditcard-sampled.csv'), np.concatenate((X_1, y_1[:, np.newaxis]), axis=1), delimiter=',')
+    # # print(X.shape)
     # print(y.shape)
-    load_titanic()
-    load_santander()
-    load_toy()
-    load_safedriver()
+    # load_titanic()
+    # load_santander()
+    # load_toy()
+    # load_safedriver()
