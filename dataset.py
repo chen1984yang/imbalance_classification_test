@@ -116,9 +116,23 @@ def load_fraud_detection(direct=True, sampled=False):
     print("fraud detection loaded in", time.time() - start, "s")
     return full_X, full_y
 
+def load_synthetic_noise():
+    minority_data = np.loadtxt(join(location, DATASET_ROOT, "synthetic_noise", "data_minority.csv"), delimiter=",")
+    majority_data = np.loadtxt(join(location, DATASET_ROOT, "synthetic_noise", "data_majority.csv"), delimiter=",")
+    noise_data = np.loadtxt(join(location, DATASET_ROOT, "synthetic_noise", "data_noise.csv"), delimiter=",")
+    merged_data = np.concatenate((minority_data, majority_data, noise_data), axis=0)
+    merged_y = np.array([1] * (len(minority_data) + len(noise_data)) + [0] * len(majority_data))
+    outlier_groundtruth = np.array([1] * (len(majority_data) + len(minority_data)) + [-1] * len(noise_data))
+
+    return merged_data, merged_y, outlier_groundtruth
 
 if __name__ == '__main__':
-    X, y = load_fraud_detection(sampled=True)
+    # X, y = load_fraud_detection(sampled=True)
+    X, y, gnd = load_synthetic_noise()
+    print(X.shape)
+    from collections import Counter
+    print(Counter(y))
+    print(Counter(gnd))
     # import sampling
     # X_1, y_1 = sampling.reduce_majority(X, y)
     # pos = y_1[y_1 == 1]
