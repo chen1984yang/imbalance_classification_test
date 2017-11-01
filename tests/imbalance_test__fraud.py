@@ -30,7 +30,7 @@ def adaboost_train_1(X, y, train_index, valid_index, test_X, test_y, pos_label, 
     tpr = tp / (tp + fn)
     tnr = tn / (tn + fp)
     gmean = math.sqrt(tpr * tnr)
-    print([time.time() - start, auc_score, fscore_0, fscore_1, gmean])
+    # print([time.time() - start, auc_score, fscore_0, fscore_1, gmean])
     return [auc_score, fscore_0, fscore_1, gmean]
 
 
@@ -63,7 +63,7 @@ def randomforest_train_1(X, y, train_index, valid_index, test_X, test_y, pos_lab
     tpr = tp / (tp + fn)
     tnr = tn / (tn + fp)
     gmean = math.sqrt(tpr * tnr)
-    print([time.time() - start, auc_score, fscore_0, fscore_1, gmean])
+    # print([time.time() - start, auc_score, fscore_0, fscore_1, gmean])
     return [auc_score, fscore_0, fscore_1, gmean]
 
 def comparison_test(repeat, method, full_X, full_y, pos_label, max_features, method_name=""):
@@ -150,8 +150,8 @@ if __name__ == '__main__':
     full_X, full_y, pos_label, max_features = generate_data(d_i)
 
     for m_i in testMethod:
-        if m_i > 9 or m_i < 8:
-            continue
-        result = np.array(comparison_test(repeat=2, method=m_i, full_X=full_X, full_y=full_y, pos_label=pos_label, max_features=max_features, method_name=method[m_i]))
+        # if m_i > 9 or m_i < 8:
+        #     continue
+        result = np.array(comparison_test(repeat=5, method=m_i, full_X=full_X, full_y=full_y, pos_label=pos_label, max_features=max_features, method_name=method[m_i]))
         file_log(log_name, data[d_i], method[m_i], result)
     file_log(log_name, "finish", str(datetime.datetime.now()))

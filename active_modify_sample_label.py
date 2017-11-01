@@ -110,8 +110,8 @@ def active_modify_label_only_training_set(param, X, y, detector_name, detector, 
         lgb_model = model.fit(train_X, updated_y)
         predicted_proba = lgb_model.predict_proba(test_X)
         prediction = predicted_proba[:, 1]
-        prediction = np.where(prediction > threshold, [1], [0])
         auc = roc_auc_score(test_y, prediction)
+        prediction = np.where(prediction > threshold, [1], [0])
         roc.append(auc)
         conf_mat = confusion_matrix(test_y, prediction)
         all_confusion_matrix.append(conf_mat)

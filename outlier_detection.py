@@ -98,7 +98,7 @@ def generate_detectors(n_samples, n_features, estimated_outlier_fraction=0.05, r
     classifiers = {
         # "One-Class-SVM": svm.OneClassSVM(nu=0.95 * outliers_fraction + 0.05,
         #                                  kernel="rbf", gamma=0.1),
-        # "Robust-Covariance": EllipticEnvelope(contamination=estimated_outlier_fraction, random_state=random_state),
+        "Robust-Covariance": EllipticEnvelope(contamination=estimated_outlier_fraction, random_state=random_state),
         "Isolation-Forest": IsolationForest(contamination=estimated_outlier_fraction, random_state=random_state),
         "Local-Outlier-Factor": LocalOutlierFactor(
             n_neighbors=35,

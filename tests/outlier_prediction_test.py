@@ -11,11 +11,11 @@ if __name__ == '__main__':
     n_split = 10
     # noise_rates = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
     noise_rates = [0.04, 0.4]
-    # dataset_name = "fraud"
-    # file_name = "cv-tsne-result-fraud-0.0134-3330-492.npy"
+    dataset_name = "fraud"
+    file_name = "cv-tsne-result-fraud-0.0134-3330-492.npy"
 
-    dataset_name = "santander"
-    file_name = "cv-tsne-result-santander-0.7335-52751-3008.npy"
+    # dataset_name = "santander"
+    # file_name = "cv-tsne-result-santander-0.7335-52751-3008.npy"
 
     path = join(file_name)
     cached_result = np.load(path)
@@ -30,6 +30,7 @@ if __name__ == '__main__':
     X, y, tsne_result = tsne_plot.parse_cv_tsne_result(cached_result, n_split=n_split)
     n_samples, n_features = X.shape
     counter = Counter(y)
+    print(counter)
     minority_class = min(counter, key=counter.get)
     print(X.shape, y.shape)
 
@@ -53,7 +54,8 @@ if __name__ == '__main__':
             noised_minority_y = train_y[noised_minority_indices]
 
             for detector_name in detectors:
-
+                # if detector_name.startswith("3Sigma"):
+                #     continue
                 if rate != 0:
                     outlier_prediction = omni_detector_detect(detectors[detector_name], noised_minority_X)
                     outlier_prediction = np.where(outlier_prediction == 1, [1], [-1])
@@ -62,7 +64,7 @@ if __name__ == '__main__':
 
                 detection_confusion_matrix = confusion_matrix(groundtruth[noised_minority_indices], outlier_prediction)
                 print(np.ravel(detection_confusion_matrix))
-                color_index = - np.ones(shape=len(train_y), dtype=np.int)
+                color_index = - np.zeros(shape=len(train_y), dtype=np.int)
                 prediction_for_noised_only = []
                 for idx, instance_outlier_groundtruth, instance_outlier_prediction, instance_true_label in zip(
                         range(len(noised_minority_y)),
@@ -72,14 +74,14 @@ if __name__ == '__main__':
                     color_type = -1
                     if instance_outlier_groundtruth == instance_outlier_prediction:  # correct prediction
                         if instance_true_label == minority_class:
-                            color_type = 2  # "#dc3912" red
+                            color_type = 2  # "#dc3912" orange TN
                         else:
-                            color_type = 1  # "#3366cc" blue
+                            color_type = 1  # "#3366cc" blue TP
                     else:
                         if instance_true_label == minority_class:
-                            color_type = 3
+                            color_type = 3  # green FN
                         else:
-                            color_type = 4
+                            color_type = 4  # violet FP
                     prediction_for_noised_only.append(color_type)
 
                 color_index[noised_minority_indices] = prediction_for_noised_only
@@ -89,11 +91,11 @@ if __name__ == '__main__':
                 colors = tool.cluster2color(color_index)
 
                 figure_name = "{}-{:.2f}-{}-{}.png".format(dataset_name, rate, i, detector_name)
-                path = join("tests", config.FIGURE_ROOT, figure_name)
+                path = join(config.FIGURE_ROOT, figure_name)
                 tsne_plot.save_plot2png(corr_x[selection==0], corr_y[selection==0], colors, path)
                 print("saved to", path)
 
-
+        break
 
     # X, y = load_fraud_detection()
     #

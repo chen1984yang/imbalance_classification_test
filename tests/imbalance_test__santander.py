@@ -19,10 +19,11 @@ def adaboost_train_1(X, y, train_index, valid_index, test_X, test_y, pos_label, 
     clf.fit(X[train_index], y[train_index])
 
     pred_y = clf.predict_proba(test_X)[:, 1]
-    pred_y = np.where(pred_y > THRESHOLD, [1], [0])
 
     # calculate auc
     auc_score = roc_auc_score(test_y, pred_y)
+
+    pred_y = np.where(pred_y > THRESHOLD, [1], [0])
 
     # calculate f-score
     fscore_1 = metrics.f1_score(test_y, pred_y, average='binary', pos_label=1)
@@ -53,9 +54,9 @@ def randomforest_train_1(X, y, train_index, valid_index, test_X, test_y, pos_lab
     start = time.time()
     clf.fit(X[train_index], y[train_index])
     pred_y = clf.predict_proba(test_X)[:, 1]
-    pred_y = np.where(pred_y > THRESHOLD, [1], [0])
     # calculate auc
     auc_score = roc_auc_score(test_y, pred_y)
+    pred_y = np.where(pred_y > THRESHOLD, [1], [0])
 
     # calculate f-score
     fscore_1 = metrics.f1_score(test_y, pred_y, average='binary', pos_label=1)
