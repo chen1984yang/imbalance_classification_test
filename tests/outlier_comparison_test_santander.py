@@ -20,8 +20,8 @@ if __name__ == '__main__':
     }
 
     step = 0.01
-    stages = 40
-    for i in range(6, stages):
+    stages = 6
+    for i in range(0, stages):
         outliers_fraction = (i + 1) * step
         # outliers_fraction = 0
         detectors = generate_detectors(n_samples, n_features, outliers_fraction, random_state=i)

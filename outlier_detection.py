@@ -4,7 +4,7 @@ from collections import Counter
 from sklearn.covariance import EllipticEnvelope
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
-
+from sklearn.cluster import DBSCAN
 class KSigmaOutlierDetector(object):
     """
     Actually an abnormal detection among majority classes
@@ -26,7 +26,7 @@ class KSigmaOutlierDetector(object):
             for j in range(X.shape[0]):
                 if abs(X[j, i] - mean) >= std * self._k:
                     outlying_count[j] += 1
-        return np.where(outlying_count > self._ofc, [-1], [1])
+        return np.where(outlying_count >= self._ofc, [-1], [1])
 
     def set_params(self, **params):
         pass
@@ -81,7 +81,7 @@ class DummyOutlierDetector(object):
     def set_params(self, **params):
         pass
 
-def generate_ksigma_detectors(n_features):
+def generate_ksigma_detectors(n_features, k=3):
     classifiers = {}
     # add a bunch of ksigma-outlier-detector
     for j in range(2):
@@ -89,8 +89,8 @@ def generate_ksigma_detectors(n_features):
         ratio_threshold = (j + 1) * 0.5
         n_outlying_feature = int(ratio_threshold * n_features)
 
-        classifiers["3Sigma-{}".format(n_outlying_feature)] = KSigmaOutlierDetector(
-            outlying_feature_count=n_outlying_feature)
+        classifiers["{}Sigma-{}".format(k, n_outlying_feature)] = KSigmaOutlierDetector(
+            outlying_feature_count=n_outlying_feature, k=k)
     return classifiers
 
 
@@ -99,16 +99,19 @@ def generate_detectors(n_samples, n_features, estimated_outlier_fraction=0.05, r
         # "One-Class-SVM": svm.OneClassSVM(nu=0.95 * outliers_fraction + 0.05,
         #                                  kernel="rbf", gamma=0.1),
         "Robust-Covariance": EllipticEnvelope(contamination=estimated_outlier_fraction, random_state=random_state),
-        "Isolation-Forest": IsolationForest(contamination=estimated_outlier_fraction, random_state=random_state),
+        "Isolation-Forest": IsolationForest(n_estimators=50, contamination=estimated_outlier_fraction, random_state=random_state),
         "Local-Outlier-Factor": LocalOutlierFactor(
-            n_neighbors=35,
+            n_neighbors=5,
             contamination=estimated_outlier_fraction),
+        # "DBScan": DBSCAN(),
+
         "Dummy": DummyOutlierDetector()
     }
     ksigma_detectors = generate_ksigma_detectors(n_features)
     classifiers.update(ksigma_detectors)
 
     return classifiers
+
 
 def omni_detector_detect(detector, X) -> np.ndarray:
     detector_class = detector.__class__

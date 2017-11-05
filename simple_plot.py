@@ -3,6 +3,7 @@ from sklearn import manifold
 import matplotlib.pyplot as plt
 from sklearn import manifold
 import numpy as np
+import matplotlib.patches as mpatches
 
 
 def compute_tsne(X, perplexity, learning_rate, n_iter):
@@ -75,16 +76,37 @@ def parse_cv_tsne_result(result, n_split=10):
     # print(original_feature.shape, label.shape, tsne_result.shape)
     return original_feature, label, tsne_list
 
-def save_plot2png(x, y, color, path):
+
+def save_plot2png(x, y, color, path, title="", legend_map=None):
     import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(nrows=1, ncols=1)  # create figure & 1 axis
+    fig, ax = plt.subplots(nrows=1, ncols=1, )  # create figure & 1 axis
     # ax.plot([0, 1, 2], [10, 20, 3])
     if type(color) == np.ndarray:
         color = color.tolist()
-    ax.scatter(x, y, color=color, s=1)
-    # ax.legend()
-    plt.savefig(path)  # save the figure to file
+    ax.scatter(x, y, color=color, s=0.5)
+    
+    if legend_map is None:
+        legend_map = {}
+        
+    patches = []
+    for legend_name in sorted(legend_map.keys()):
+        patch = mpatches.Patch(color=legend_map[legend_name], label=legend_name)
+        patches.append(patch)
+    plt.legend(handles=patches)
+    plt.title(title)
+    plt.savefig(path, dpi=300)  # save the figure to file
     plt.close(fig)
+    
+    
+# def save_plot(x, y, color, path):
+#     plt.plot(x, y)
+#
+#     plt.xlabel('time (s)')
+#     plt.ylabel('voltage (mV)')
+#     plt.title('About as simple as it gets, folks')
+#     plt.grid(True)
+#     plt.savefig(path)
+#     # plt.show()
 
 
 if __name__ == '__main__':
@@ -92,9 +114,4 @@ if __name__ == '__main__':
     x = np.random.rand(N)
     y = np.random.rand(N)
     colors = np.random.rand(N)
-
-    save_plot2png(x, y, colors, 'to.png')
-    x = np.random.rand(N)
-    y = np.random.rand(N)
-    colors = np.random.rand(N)
-    save_plot2png(x, y, colors, 'to1.png')
+    # save_plot(x, y, colors, 'to1.png')
