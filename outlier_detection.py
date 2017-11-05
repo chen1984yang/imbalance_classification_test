@@ -4,7 +4,7 @@ from collections import Counter
 from sklearn.covariance import EllipticEnvelope
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
-
+from sklearn.cluster import DBSCAN
 class KSigmaOutlierDetector(object):
     """
     Actually an abnormal detection among majority classes
@@ -103,12 +103,15 @@ def generate_detectors(n_samples, n_features, estimated_outlier_fraction=0.05, r
         "Local-Outlier-Factor": LocalOutlierFactor(
             n_neighbors=35,
             contamination=estimated_outlier_fraction),
+        # "DBScan": DBSCAN(),
+
         "Dummy": DummyOutlierDetector()
     }
     ksigma_detectors = generate_ksigma_detectors(n_features)
     classifiers.update(ksigma_detectors)
 
     return classifiers
+
 
 def omni_detector_detect(detector, X) -> np.ndarray:
     detector_class = detector.__class__

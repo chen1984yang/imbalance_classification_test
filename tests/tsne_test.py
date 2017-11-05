@@ -9,6 +9,7 @@ if __name__ == '__main__':
     n_split = 10
     # dataset = "fraud"
     # X, y = load_fraud_detection()
+    # print(Counter(y))
     dataset = "santander"
     X, y = load_santander()
 
