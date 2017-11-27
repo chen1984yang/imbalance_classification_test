@@ -18,4 +18,16 @@ For non-ensemble methods, the number of classification iterations is 40
 
 The number of subsets for ensemble methods is 4 
 
+## Outlier Detection Experiments
+#####Examples
+tests/outlier_comparison_test_<dataset>.py
+
+Each example is basically a python script, modifying several variables is needed to custom an outlier detection experiment.
+
+#####Variables
+log_file: target path of log recorded
+
+noise_true_ratios: a list of ratios of _noise / true minority_
+
+
 
