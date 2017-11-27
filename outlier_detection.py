@@ -81,13 +81,11 @@ class DummyOutlierDetector(object):
     def set_params(self, **params):
         pass
 
-def generate_ksigma_detectors(n_features, k=3):
+def generate_ksigma_detectors(thresholds: list, k=3):
     classifiers = {}
     # add a bunch of ksigma-outlier-detector
-    for j in range(2):
-    # for j in [0.1]:
-        ratio_threshold = (j + 1) * 0.5
-        n_outlying_feature = int(ratio_threshold * n_features)
+    for j in thresholds:
+        n_outlying_feature = j
 
         classifiers["{}Sigma-{}".format(k, n_outlying_feature)] = KSigmaOutlierDetector(
             outlying_feature_count=n_outlying_feature, k=k)
@@ -107,9 +105,6 @@ def generate_detectors(n_samples, n_features, estimated_outlier_fraction=0.05, r
 
         "Dummy": DummyOutlierDetector()
     }
-    ksigma_detectors = generate_ksigma_detectors(n_features)
-    classifiers.update(ksigma_detectors)
-
     return classifiers
 
 

@@ -77,41 +77,78 @@ def parse_cv_tsne_result(result, n_split=10):
     return original_feature, label, tsne_list
 
 
-def save_plot2png(x, y, color, path, title="", legend_map=None):
-    import matplotlib.pyplot as plt
+def save_plot2png(x, y, color, path, title="", color_map=None):
+    
     fig, ax = plt.subplots(nrows=1, ncols=1, )  # create figure & 1 axis
     # ax.plot([0, 1, 2], [10, 20, 3])
     if type(color) == np.ndarray:
         color = color.tolist()
     ax.scatter(x, y, color=color, s=0.5)
     
-    if legend_map is None:
-        legend_map = {}
+    if color_map is None:
+        color_map = {}
         
     patches = []
-    for legend_name in sorted(legend_map.keys()):
-        patch = mpatches.Patch(color=legend_map[legend_name], label=legend_name)
+
+    for legend_name in color_map:
+
+        patch = mpatches.Patch(color=color_map[legend_name], label=legend_name)
         patches.append(patch)
     plt.legend(handles=patches)
     plt.title(title)
     plt.savefig(path, dpi=300)  # save the figure to file
     plt.close(fig)
+
+
+def save_linechart(series, x_values, path, title="", x_title="", y_title="", color_map=None):
+    fig, ax = plt.subplots(nrows=1, ncols=1)
+    plt.grid(linestyle='dotted')
+    idx = 0
+    handles = []
+    series_names = []
     
+    if color_map is None:
+        color_map = {}
+
+    reference_series = "Dummy"
+    legends = sorted(series.keys())
+    if reference_series in legends:
+        legends.remove(reference_series)
+        legends = [reference_series] + legends
+    linewidth = 1.0
+    for key in legends:
+        series_names.append(key)
+        color = None
+        if key in color_map:
+            color = color_map[key]
+        # print(key, color)
+        w = linewidth
+        if key == reference_series:
+            w *= 4
+        handle, = ax.plot(x_values, series[key], label=key, color=color, linewidth=w)
+        handles.append(handle)
+        
+    plt.legend(handles, series_names)
     
-# def save_plot(x, y, color, path):
-#     plt.plot(x, y)
-#
-#     plt.xlabel('time (s)')
-#     plt.ylabel('voltage (mV)')
-#     plt.title('About as simple as it gets, folks')
-#     plt.grid(True)
-#     plt.savefig(path)
-#     # plt.show()
+    plt.title(title)
+    plt.xlabel(x_title)
+    plt.ylabel(y_title)
+    plt.savefig(path, dpi=300)
+    print("plot", title, "saved to", path)
+    plt.close(fig)
 
 
 if __name__ == '__main__':
     N = 100
     x = np.random.rand(N)
     y = np.random.rand(N)
-    colors = np.random.rand(N)
+    x_values = np.arange(N)
+    color_map = {
+        "x": "#3c3c3c"
+    }
+    save_linechart({
+        "x": x,
+        "y": y
+    }, x_values, "linechart.png", "demo", "x", "y", color_map=color_map)
+    # colors = np.random.rand(N)
     # save_plot(x, y, colors, 'to1.png')

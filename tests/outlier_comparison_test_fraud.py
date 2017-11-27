@@ -20,13 +20,35 @@ if __name__ == '__main__':
         'num_leaves': 30
     }
 
-    step = 0.0005
-    n_stage = 4
-    for i in range(1, n_stage + 1):
-        outliers_fraction = (i) * step
+    columns = [
+        "noise_ratio",
+        "method",
+        "time",
+        "n_err",
+        "accuracy",
+        "classification true majority",
+        "classification false minority",
+        "classification false majority",
+        "classification true minority",
+        "detection true majority",
+        "detection false minority",
+        "detection false majority",
+        "detection true minority"
+    ]
+    step = 0.005
+    n_stage = 300
+    log_file = "outlier-detection-fraud.log"
+    file_log(log_file, ",".join(columns))
+    if os.path.exists(log_file):
+        os.remove(log_file)
+
+    for i in range(0, n_stage + 1):
+        noise_true_ratio = (i) * step
         # outliers_fraction = 0
         detectors = generate_detectors(n_samples, n_features, random_state=i)
-        # classifiers = generate_ksigma_detectors(n_features)
+        ksigma_detectors = generate_ksigma_detectors([1, 2, 5, 10, 15, 20, 25, 30])
+        detectors.update(ksigma_detectors)
+
         for detector_name in detectors:
             detector = detectors[detector_name]
-            active_modify_label_only_training_set(fraud_params, X, y, detector_name, detector, noise_probability=outliers_fraction, threshold=0.5, log_identifier="fraud_test_11", verbose=False, repeat=10)
+            active_modify_label_only_training_set(fraud_params, X, y, detector_name, detector, noise_true_ratio=noise_true_ratio, threshold=0.5, log_identifier=log_file, verbose=False, repeat=1)
